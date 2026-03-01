@@ -83,10 +83,10 @@ export default async function GamePage({ params }: { params: Promise<{ id: strin
     return (
         <>
             <Header />
-            <main className="flex-1 flex flex-col pb-20">
+            <main className="flex-1 flex flex-col pb-20 max-w-[2000px] mx-auto w-full">
 
                 {/* Hero Section */}
-                <div className="relative w-full h-[50vh] min-h-[400px]">
+                <div className="relative w-full h-[50vh] min-h-[400px] max-h-[600px] overflow-hidden">
                     {game.screenshots && game.screenshots.length > 0 ? (
                         <Image
                             src={game.screenshots[0]}
@@ -101,7 +101,7 @@ export default async function GamePage({ params }: { params: Promise<{ id: strin
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
 
-                    <div className="absolute inset-0 container mx-auto px-4 flex items-end pb-10">
+                    <div className="absolute inset-0 container max-w-7xl mx-auto px-4 flex items-end pb-10">
                         <div className="flex flex-col md:flex-row gap-8 items-end w-full">
                             {/* Cover Art */}
                             <div className="relative w-[200px] h-[280px] shrink-0 rounded-2xl overflow-hidden border-2 border-border shadow-2xl z-10 hidden md:block group">
@@ -161,7 +161,7 @@ export default async function GamePage({ params }: { params: Promise<{ id: strin
                 </div>
 
                 {/* Content Section */}
-                <div className="container mx-auto px-4 pt-8">
+                <div className="container max-w-7xl mx-auto px-4 pt-8">
                     <div className="flex flex-col lg:flex-row gap-12">
 
                         {/* Left Column: Details & Media */}
