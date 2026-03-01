@@ -1,4 +1,4 @@
-import { getIgdbToken } from './src/lib/igdbAuth.ts';
+import { getIgdbToken } from './src/lib/igdbAuth';
 
 async function run() {
     const accessToken = await getIgdbToken();
