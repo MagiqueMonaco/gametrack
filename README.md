@@ -44,7 +44,7 @@ GameTrack fetches all its live data from the IGDB database, which requires a Twi
 Clone the repository and set up your environment variables based on the example file.
 
 ```bash
-git clone https://github.com/magique-monaco/gametrack.git
+git clone https://github.com/MagiqueMonaco/gametrack.git
 cd gametrack
 
 # Copy the example environment file
