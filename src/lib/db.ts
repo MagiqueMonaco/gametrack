@@ -1,4 +1,5 @@
 import { createClient, Client as LibsqlClient } from '@libsql/client';
+import type { InArgs } from '@libsql/client';
 import { Pool } from 'pg';
 import path from 'path';
 import fs from 'fs';
@@ -55,7 +56,7 @@ async function query(sql: string, params: unknown[] = []): Promise<QueryResult> 
     return { rows: result.rows };
   } else {
     const db = getSqlite();
-    const result = await db.execute({ sql, args: params as any });
+    const result = await db.execute({ sql, args: params as InArgs });
     return { rows: result.rows as unknown as Record<string, unknown>[] };
   }
 }
@@ -67,7 +68,7 @@ async function run(sql: string, params: unknown[] = []): Promise<void> {
     await getPgPool().query(pgSql, params);
   } else {
     const db = getSqlite();
-    await db.execute({ sql, args: params as any });
+    await db.execute({ sql, args: params as InArgs });
   }
 }
 

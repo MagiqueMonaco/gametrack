@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getIgdbToken } from '@/lib/igdbAuth';
+import { IgdbGameRecord, IgdbImageAsset, IgdbInvolvedCompany, IgdbNamedEntity, IgdbPlatform } from '@/lib/igdb';
 import { getAgeRatingString } from '@/lib/ratings';
 
 export async function GET(
@@ -47,13 +48,12 @@ export async function GET(
       throw new Error(`IGDB API responded with status: ${res.status}`);
     }
 
-    const rawGames = await res.json();
+    const rawGames = (await res.json()) as IgdbGameRecord[];
     
     if (!rawGames || rawGames.length === 0) {
       return NextResponse.json({ error: 'Game not found' }, { status: 404 });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const g = rawGames[0];
     
     // Format full details
@@ -61,13 +61,10 @@ export async function GET(
       ? `https://images.igdb.com/igdb/image/upload/t_1080p/${g.cover.image_id}.jpg`
       : 'https://images.igdb.com/igdb/image/upload/t_1080p/nocover.png';
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const screenshotUrls = g.screenshots ? g.screenshots.map((s: any) => `https://images.igdb.com/igdb/image/upload/t_1080p/${s.image_id}.jpg`) : [];
+    const screenshotUrls = g.screenshots ? g.screenshots.map((screenshot: IgdbImageAsset) => `https://images.igdb.com/igdb/image/upload/t_1080p/${screenshot.image_id}.jpg`) : [];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const developers = g.involved_companies?.filter((c: any) => c.developer) || [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const publishers = g.involved_companies?.filter((c: any) => c.publisher) || [];
+    const developers = g.involved_companies?.filter((company: IgdbInvolvedCompany) => company.developer) || [];
+    const publishers = g.involved_companies?.filter((company: IgdbInvolvedCompany) => company.publisher) || [];
 
     const formattedGame = {
       id: g.id,
@@ -77,19 +74,14 @@ export async function GET(
       short_description: g.summary || 'No description available.',
       description: g.storyline || g.summary || 'No description available.',
       game_url: g.url || `https://www.igdb.com/games/${g.id}`,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      genre: g.genres ? g.genres.map((gn: any) => gn.name).join(', ') : 'Various',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      platform: g.platforms ? g.platforms.map((p: any) => p.abbreviation || p.name).join(', ') : 'Unknown',
+      genre: g.genres ? g.genres.map((genre: IgdbNamedEntity) => genre.name).join(', ') : 'Various',
+      platform: g.platforms ? g.platforms.map((platform: IgdbPlatform) => platform.abbreviation || platform.name).join(', ') : 'Unknown',
       // Provide array of exact platform strings for the icon mapper
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      platform_list: g.platforms ? g.platforms.map((p: any) => p.name) : [],
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      publisher: publishers.length > 0 ? publishers.map((c: any) => c.company.name).join(', ') : 'Unknown Publisher',
-      publisher_id: publishers.length > 0 ? publishers[0].company.id : undefined,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      developer: developers.length > 0 ? developers.map((c: any) => c.company.name).join(', ') : 'Unknown Developer',
-      developer_id: developers.length > 0 ? developers[0].company.id : undefined,
+      platform_list: g.platforms ? g.platforms.map((platform: IgdbPlatform) => platform.name) : [],
+      publisher: publishers.length > 0 ? publishers.map((company: IgdbInvolvedCompany) => company.company?.name || 'Unknown Publisher').join(', ') : 'Unknown Publisher',
+      publisher_id: publishers.length > 0 ? publishers[0].company?.id ?? undefined : undefined,
+      developer: developers.length > 0 ? developers.map((company: IgdbInvolvedCompany) => company.company?.name || 'Unknown Developer').join(', ') : 'Unknown Developer',
+      developer_id: developers.length > 0 ? developers[0].company?.id ?? undefined : undefined,
       release_date: g.first_release_date ? new Date(g.first_release_date * 1000).toISOString().split('T')[0] : 'TBD',
       screenshots: screenshotUrls,
       websites: g.websites || [],

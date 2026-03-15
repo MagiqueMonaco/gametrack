@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { useLibraryStore, TrackedGame, GameStatus } from '@/store/useLibraryStore';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useClientMounted } from '@/lib/useClientMounted';
 import Header from '@/components/Header';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -10,7 +11,7 @@ import { Download, Upload, Trash2, Search, Filter, CloudUpload, CloudDownload, C
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function LibraryPage() {
-    const [mounted, setMounted] = useState(false);
+    const mounted = useClientMounted();
     const { games, removeGame, updateStatus, updatePlaytime, importLibrary, syncToServer, syncFromServer, isSyncing, lastSyncedAt } = useLibraryStore();
     const { user } = useAuthStore();
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -18,10 +19,6 @@ export default function LibraryPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<GameStatus | 'All'>('All');
     const [syncMessage, setSyncMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
 
     // Clear sync message after 3 seconds
     useEffect(() => {
@@ -125,18 +122,22 @@ export default function LibraryPage() {
     const hasCheckedSync = useRef(false);
     const [showSyncPrompt, setShowSyncPrompt] = useState(false);
 
+    const runInitialSyncCheck = useEffectEvent(async () => {
+        if (games.length > 0 && !lastSyncedAt) {
+            setShowSyncPrompt(true);
+            return;
+        }
+
+        if (games.length === 0) {
+            await handleSyncFromServer();
+        }
+    });
+
     // Initial sync check when logging in
     useEffect(() => {
         if (user && mounted && !hasCheckedSync.current) {
             hasCheckedSync.current = true;
-            if (games.length > 0 && !lastSyncedAt) {
-                // User logged in, has local games, but hasn't synced yet
-                setShowSyncPrompt(true);
-            } else if (games.length === 0) {
-                // Auto-pull if library is empty
-                // Note: Ignoring promise return to satisfy eslint/useEffect rules
-                void handleSyncFromServer();
-            }
+            void runInitialSyncCheck();
         }
     }, [user, mounted, games.length, lastSyncedAt]);
 

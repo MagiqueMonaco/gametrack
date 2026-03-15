@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getIgdbToken } from '@/lib/igdbAuth';
+import { IgdbGameRecord, isStandaloneGame } from '@/lib/igdb';
 import { getAgeRatingString } from '@/lib/ratings';
 
 // Keep rate limiting logic
@@ -101,7 +102,7 @@ export async function GET(request: Request) {
 
     // Prepare IGDB query
     const query = `
-      fields name,category,game_type,version_parent,cover.image_id,summary,url,genres.name,platforms.name,platforms.abbreviation,involved_companies.company.name,first_release_date,total_rating,age_ratings.rating_category; 
+      fields name,category,game_type,version_parent,cover.image_id,artworks.image_id,screenshots.image_id,summary,url,genres.name,platforms.name,platforms.abbreviation,involved_companies.company.name,first_release_date,total_rating,age_ratings.rating_category; 
       ${queryConditions}
       limit ${limit}; 
       offset ${offset};
@@ -126,35 +127,35 @@ export async function GET(request: Request) {
       throw new Error(`IGDB API responded with status: ${res.status}`);
     }
 
-    const rawGames = await res.json();
-    
-    // Filter out non-standalone items like bundles, DLCs, and game editions
-    const allowedCategoryTypes = [0, 8, 9];
-    const filteredGames = (rawGames || []).filter((g: any) => 
-      allowedCategoryTypes.includes(g.category ?? g.game_type ?? 0) && !g.version_parent
-    );
-    
-    // Map IGDB response to our GameCard format
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const formattedGames = filteredGames.map((g: any) => {
+    const rawGames = (await res.json()) as IgdbGameRecord[];
+    const filteredGames = rawGames.filter(isStandaloneGame);
+
+    const formattedGames = filteredGames.map((g) => {
       // Find developer (involved_companies have a boolean for developer or publisher, but just grab the first company name for now if available)
       const developerName = g.involved_companies?.[0]?.company?.name || 'Unknown Developer';
       const developerId = g.involved_companies?.[0]?.company?.id || null;
-      
-      const platformsList = g.platforms ? g.platforms.map((p: {name: string, abbreviation?: string}) => p.abbreviation || p.name).join(', ') : 'Unknown';
-      const genresList = g.genres ? g.genres.map((gn: {name: string}) => gn.name).join(', ') : 'Various';
+
+      const platformsList = g.platforms ? g.platforms.map((p) => p.abbreviation || p.name).join(', ') : 'Unknown';
+      const genresList = g.genres ? g.genres.map((genre) => genre.name).join(', ') : 'Various';
 
       const coverUrl = g.cover?.image_id 
         ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${g.cover.image_id}.jpg`
         : 'https://images.igdb.com/igdb/image/upload/t_cover_big/nocover.png'; // Fallback
 
+      const artworkUrl = g.artworks?.[0]?.image_id
+        ? `https://images.igdb.com/igdb/image/upload/t_1080p/${g.artworks[0].image_id}.jpg`
+        : g.screenshots?.[0]?.image_id
+          ? `https://images.igdb.com/igdb/image/upload/t_1080p/${g.screenshots[0].image_id}.jpg`
+          : undefined;
+
       return {
         id: g.id,
         title: g.name,
         thumbnail: coverUrl,
+        artwork: artworkUrl,
         short_description: g.summary || 'No description available.',
         game_url: g.url || `https://www.igdb.com/games/${g.id}`,
-        genre: genresList.split(',')[0], // Primary genre
+        genre: genresList.split(',')[0] || 'Unknown', // Primary genre
         platform: platformsList,
         publisher: developerName, // Simplify for demo
         developer: developerName,

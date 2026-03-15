@@ -216,7 +216,7 @@ export default function SearchBar() {
                                 onClick={handleSubmit}
                                 className="p-3 text-center text-xs font-semibold text-primary hover:bg-primary/10 cursor-pointer border-t border-border mt-auto transition-colors"
                             >
-                                View all results for "{debouncedQuery}"
+                                View all results for &quot;{debouncedQuery}&quot;
                             </div>
                         </div>
                     ) : (

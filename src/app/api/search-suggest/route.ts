@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getIgdbToken } from '@/lib/igdbAuth';
+import { IgdbCompanyRecord, IgdbGameRecord, isStandaloneGame } from '@/lib/igdb';
 
 // Rate limiting logic
 const rateLimitMap = new Map<string, { count: number; timestamp: number }>();
@@ -99,17 +100,12 @@ export async function GET(request: Request) {
         throw new Error(`IGDB Companies API error: ${companiesRes.status}`);
     }
 
-    const rawGames = await gamesRes.json();
-    const rawCompanies = await companiesRes.json();
+    const rawGames = (await gamesRes.json()) as IgdbGameRecord[];
+    const rawCompanies = (await companiesRes.json()) as IgdbCompanyRecord[];
 
-    // Game Filtering logic identical to the standard search
-    const allowedCategoryTypes = [0, 8, 9];
-    const filteredGames = (rawGames || []).filter((g: any) => 
-      allowedCategoryTypes.includes(g.category ?? g.game_type ?? 0) && !g.version_parent
-    );
+    const filteredGames = rawGames.filter(isStandaloneGame);
 
-    // Format games
-    const formattedGames = filteredGames.map((g: any) => ({
+    const formattedGames = filteredGames.map((g) => ({
         id: g.id,
         title: g.name,
         thumbnail: g.cover?.image_id 
@@ -120,12 +116,11 @@ export async function GET(request: Request) {
         rating: g.total_rating ? parseFloat((g.total_rating / 10).toFixed(1)) : null,
     }));
 
-    // Format companies
-    const formattedCompanies = rawCompanies.map((c: any) => ({
-        id: c.id,
-        name: c.name,
-        logoUrl: c.logo?.image_id 
-            ? `https://images.igdb.com/igdb/image/upload/t_logo_med/${c.logo.image_id}.png`
+    const formattedCompanies = rawCompanies.map((company) => ({
+        id: company.id,
+        name: company.name,
+        logoUrl: company.logo?.image_id 
+            ? `https://images.igdb.com/igdb/image/upload/t_logo_med/${company.logo.image_id}.png`
             : null,
     }));
 

@@ -1,9 +1,13 @@
 import { Suspense } from "react";
 import Header from "@/components/Header";
-import GameCard from "@/components/GameCard";
 import GameCarousel from "@/components/GameCarousel";
+import FeaturedHero from "@/components/FeaturedHero";
+import GenreHighlights from "@/components/GenreHighlights";
+import CategoryColumns from "@/components/CategoryColumns";
+import GameGridSection from "@/components/GameGridSection";
+import TopRatedList from "@/components/TopRatedList";
 import LoadingGrid from "@/components/LoadingGrid";
-import { Game } from "@/components/GameCard";
+import type { Game } from "@/components/GameCard";
 
 export const dynamic = 'force-dynamic';
 
@@ -44,23 +48,16 @@ async function GameSection({ title, category, limit = 20, viewAllLink }: { title
   );
 }
 
-export default function Home() {
+export default async function Home() {
+  const featuredGames = await getGames('anticipated', 5);
+
   return (
     <>
       <Header />
       <main className="flex-1 container mx-auto px-4 py-4 md:py-8 lg:px-8">
-        <div className="relative mb-12 md:mb-20 text-center pt-12 md:pt-20 pb-4">
-          {/* Subtle background glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-primary/20 blur-[100px] rounded-full pointer-events-none -z-10" />
-          
-          <h1 className="text-5xl md:text-7xl font-sans font-extrabold tracking-tight mb-4 md:mb-6 text-foreground/90 leading-tight">
-            Discover <br className="md:hidden" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-400">Amazing</span> Games
-          </h1>
-          <p className="text-base md:text-xl text-foreground/60 max-w-2xl mx-auto font-medium tracking-wide">
-            Your premium tracklist of the very best titles available right now.
-          </p>
-        </div>
+        
+        {/* Featured Hero Carousel replaces text header */}
+        <FeaturedHero games={featuredGames} />
 
         <Suspense fallback={<LoadingGrid />}>
           <GameSection title="Most Anticipated" category="anticipated" limit={20} viewAllLink="/search?category=anticipated" />
@@ -71,45 +68,21 @@ export default function Home() {
         </Suspense>
 
         <Suspense fallback={<LoadingGrid />}>
-          <GameSection title="Highest Rated" category="top" limit={20} viewAllLink="/search?category=top" />
+          <GenreHighlights />
         </Suspense>
 
         <Suspense fallback={<LoadingGrid />}>
-          <GameSection title="Action & Adventure" category="action" limit={20} viewAllLink="/search?category=action" />
+          <CategoryColumns />
         </Suspense>
 
         <Suspense fallback={<LoadingGrid />}>
-          <GameSection title="Role-Playing Games" category="rpg" limit={20} viewAllLink="/search?category=rpg" />
+          <TopRatedList />
         </Suspense>
 
         <Suspense fallback={<LoadingGrid />}>
-          <GameSection title="First-Person & Tactics" category="shooter" limit={20} viewAllLink="/search?category=shooter" />
-        </Suspense>
-
-        <Suspense fallback={<LoadingGrid />}>
-          <GameSection title="Strategy" category="strategy" limit={20} viewAllLink="/search?category=strategy" />
-        </Suspense>
-
-        <Suspense fallback={<LoadingGrid />}>
-          <GameSection title="Sports" category="sports" limit={20} viewAllLink="/search?category=sports" />
-        </Suspense>
-
-        <Suspense fallback={<LoadingGrid />}>
-          <GameSection title="Racing" category="racing" limit={20} viewAllLink="/search?category=racing" />
-        </Suspense>
-
-        <Suspense fallback={<LoadingGrid />}>
-          <GameSection title="Fighting" category="fighting" limit={20} viewAllLink="/search?category=fighting" />
-        </Suspense>
-
-        <Suspense fallback={<LoadingGrid />}>
-          <GameSection title="Indie Discoveries" category="indie" limit={20} viewAllLink="/search?category=indie" />
+          <GameGridSection title="Indie Discoveries" category="indie" limit={10} />
         </Suspense>
       </main>
-
-      <footer className="bg-surface border-t border-border mt-auto py-8 text-center text-foreground/50 text-sm font-mono">
-        <p>GameTrack © {new Date().getFullYear()}. Using IGDB API.</p>
-      </footer>
     </>
   );
 }

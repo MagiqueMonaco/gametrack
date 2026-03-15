@@ -1,4 +1,3 @@
-import { Suspense } from 'react';
 import Header from '@/components/Header';
 import Image from 'next/image';
 import TrackGameButton from '@/components/TrackGameButton';
@@ -8,7 +7,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AGE_RATING_DESCRIPTIONS } from '@/lib/ratings';
 
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +32,6 @@ async function getGameDetails(id: string) {
 }
 
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const resolvedParams = await params;
     const game = await getGameDetails(resolvedParams.id);
@@ -71,7 +69,6 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default async function GamePage({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = await params;
     const game = await getGameDetails(resolvedParams.id);

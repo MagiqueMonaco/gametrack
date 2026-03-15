@@ -1,5 +1,6 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getAgeRatingString(ageRatings?: { rating_category?: number }[]): string | null {
+import type { IgdbAgeRating } from '@/lib/igdb';
+
+export function getAgeRatingString(ageRatings?: IgdbAgeRating[] | null): string | null {
   if (!ageRatings || !Array.isArray(ageRatings)) return null;
 
   // Try to find ESRB first (categories 1-7 map to ESRB ratings)

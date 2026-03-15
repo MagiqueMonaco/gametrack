@@ -1,6 +1,7 @@
-import { Suspense } from 'react';
 import Header from '@/components/Header';
-import GameCard, { Game } from '@/components/GameCard';
+import { Suspense } from 'react';
+import type { Game } from '@/components/GameCard';
+import LoadMoreGames from '@/components/LoadMoreGames';
 import LoadingGrid from '@/components/LoadingGrid';
 import { Search } from 'lucide-react';
 import SearchFilters from '@/components/SearchFilters';
@@ -36,8 +37,6 @@ async function searchGames(query: string, category: string | null): Promise<Game
     }
 }
 
-import LoadMoreGames from '@/components/LoadMoreGames';
-
 async function SearchResults({ query, category }: { query: string, category: string | null }) {
     const games = await searchGames(query, category);
 
@@ -60,8 +59,7 @@ async function SearchResults({ query, category }: { query: string, category: str
     );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default async function SearchPage({ searchParams }: { searchParams: Promise<any> }) {
+export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string; category?: string }> }) {
     const resolvedParams = await searchParams;
     const q = resolvedParams.q || '';
     const category = resolvedParams.category || null;
@@ -90,10 +88,6 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
                     <SearchResults query={q} category={category} />
                 </Suspense>
             </main>
-
-            <footer className="bg-surface border-t border-border mt-auto py-8 text-center text-foreground/50 text-sm font-mono">
-                <p>GameTrack © {new Date().getFullYear()}. Using IGDB API.</p>
-            </footer>
         </>
     );
 }

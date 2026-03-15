@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { BookMarked, User, LogOut, Cloud, ChevronDown } from 'lucide-react';
+import { BookMarked, User, LogOut, Cloud, ChevronDown, Search } from 'lucide-react';
 import SearchBar from '@/components/SearchBar';
 import AuthModal from '@/components/AuthModal';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -35,21 +35,34 @@ export default function Header() {
     return (
         <>
             <header className="sticky top-0 z-50 w-full glass">
-                <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-                    <Link href="/" className="flex items-center gap-2 group">
+                <div className="container mx-auto flex min-h-16 items-center px-4 py-3 md:h-16 md:py-0">
+                    <div className="flex w-full items-center justify-between gap-3 md:gap-4">
+                    <Link href="/" className="flex min-w-0 shrink items-center gap-2 group">
                         <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-xl group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(124,58,237,0.3)]">
                             GT
                         </div>
-                        <span className="text-xl font-bold tracking-tight">GameTrack</span>
+                        <span className="hidden text-xl font-bold tracking-tight sm:inline">GameTrack</span>
                     </Link>
                     <SearchBar />
 
-                    <nav className="flex items-center gap-4">
-                        <Link href="/" className="text-foreground/80 hover:text-primary transition-colors text-sm font-medium">
+                    <nav className="flex shrink-0 items-center gap-2 sm:gap-3 md:gap-4">
+                        <Link
+                            href="/search"
+                            className="flex h-9 w-9 items-center justify-center rounded-full border border-border/50 bg-surface text-foreground/80 shadow-sm transition-colors hover:border-primary/50 hover:text-primary md:hidden"
+                            aria-label="Search"
+                        >
+                            <Search className="w-4 h-4" />
+                        </Link>
+                        <Link href="/" className="hidden text-sm font-medium text-foreground/80 transition-colors hover:text-primary sm:inline">
                             Home
                         </Link>
-                        <Link href="/library" className="text-foreground/80 hover:text-primary transition-colors text-sm font-medium flex items-center gap-1.5 border border-border/50 bg-surface px-3 py-1.5 rounded-full hover:border-primary/50 shadow-sm">
-                            <BookMarked className="w-4 h-4" /> Library
+                        <Link
+                            href="/library"
+                            className="flex items-center gap-1.5 rounded-full border border-border/50 bg-surface px-2.5 py-1.5 text-sm font-medium text-foreground/80 shadow-sm transition-colors hover:border-primary/50 hover:text-primary sm:px-3"
+                            aria-label="Library"
+                        >
+                            <BookMarked className="w-4 h-4" />
+                            <span className="hidden sm:inline">Library</span>
                         </Link>
 
                         {/* Auth Button */}
@@ -58,13 +71,14 @@ export default function Header() {
                                 <div className="relative" ref={dropdownRef}>
                                     <button
                                         onClick={() => setDropdownOpen(!dropdownOpen)}
-                                        className="flex items-center gap-2 border border-border/50 bg-surface px-3 py-1.5 rounded-full hover:border-primary/50 transition-colors shadow-sm"
+                                        className="flex items-center gap-2 rounded-full border border-border/50 bg-surface px-2.5 py-1.5 shadow-sm transition-colors hover:border-primary/50 sm:px-3"
+                                        aria-label="Account menu"
                                     >
                                         <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
                                             <User className="w-3.5 h-3.5 text-primary" />
                                         </div>
-                                        <span className="text-sm font-mono text-foreground/70">{shortUuid}</span>
-                                        <ChevronDown className={`w-3.5 h-3.5 text-foreground/50 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+                                        <span className="hidden text-sm font-mono text-foreground/70 sm:inline">{shortUuid}</span>
+                                        <ChevronDown className={`hidden w-3.5 h-3.5 text-foreground/50 transition-transform sm:block ${dropdownOpen ? 'rotate-180' : ''}`} />
                                     </button>
 
                                     <AnimatePresence>
@@ -104,14 +118,15 @@ export default function Header() {
                             ) : (
                                 <button
                                     onClick={() => setAuthModalOpen(true)}
-                                    className="flex items-center gap-2 px-4 py-1.5 bg-primary hover:bg-primary-hover text-white text-sm font-semibold rounded-full transition-colors shadow-sm shadow-primary/20"
+                                    className="flex items-center gap-2 rounded-full bg-primary px-3 py-1.5 text-sm font-semibold text-white shadow-sm shadow-primary/20 transition-colors hover:bg-primary-hover sm:px-4"
                                 >
                                     <User className="w-4 h-4" />
-                                    Sign In
+                                    <span className="hidden sm:inline">Sign In</span>
                                 </button>
                             )
                         )}
                     </nav>
+                    </div>
                 </div>
             </header>
 

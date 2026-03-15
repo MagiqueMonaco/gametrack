@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useLibraryStore, GameStatus } from '@/store/useLibraryStore';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useClientMounted } from '@/lib/useClientMounted';
 import { BookmarkPlus, BookmarkCheck, Clock, Trash2 } from 'lucide-react';
 
 interface Props {
@@ -12,14 +12,9 @@ interface Props {
 }
 
 export default function TrackGameButton({ gameId, title, thumbnail }: Props) {
-    const [mounted, setMounted] = useState(false);
+    const mounted = useClientMounted();
     const { games, addGame, removeGame, updateStatus, updatePlaytime } = useLibraryStore();
     const { user } = useAuthStore();
-
-    // To avoid hydration mismatch, only render interactive elements after mount
-    useEffect(() => {
-        setMounted(true);
-    }, []);
 
     if (!mounted) {
         return (

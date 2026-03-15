@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getIgdbToken } from '@/lib/igdbAuth';
+import { IgdbGameRecord, isStandaloneGame } from '@/lib/igdb';
 import { getAgeRatingString } from '@/lib/ratings';
 
 // Keep rate limiting logic
@@ -81,21 +82,14 @@ export async function GET(request: Request) {
       throw new Error(`IGDB API responded with status: ${res.status}`);
     }
 
-    const rawGames = await res.json();
-    
-    // Filter out non-standalone items like bundles, DLCs, and game editions
-    const allowedCategoryTypes = [0, 8, 9];
-    const filteredGames = (rawGames || []).filter((g: any) => 
-      allowedCategoryTypes.includes(g.category ?? g.game_type ?? 0) && !g.version_parent
-    );
-    
-    // Map IGDB response to our GameCard format
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const formattedGames = filteredGames.map((g: any) => {
+    const rawGames = (await res.json()) as IgdbGameRecord[];
+    const filteredGames = rawGames.filter(isStandaloneGame);
+
+    const formattedGames = filteredGames.map((g) => {
       const developerName = g.involved_companies?.[0]?.company?.name || 'Unknown Developer';
-      
-      const platformsList = g.platforms ? g.platforms.map((p: {name: string, abbreviation?: string}) => p.abbreviation || p.name).join(', ') : 'Unknown';
-      const genresList = g.genres ? g.genres.map((gn: {name: string}) => gn.name).join(', ') : 'Various';
+
+      const platformsList = g.platforms ? g.platforms.map((p) => p.abbreviation || p.name).join(', ') : 'Unknown';
+      const genresList = g.genres ? g.genres.map((genre) => genre.name).join(', ') : 'Various';
 
       const coverUrl = g.cover?.image_id 
         ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${g.cover.image_id}.jpg`
@@ -107,7 +101,7 @@ export async function GET(request: Request) {
         thumbnail: coverUrl,
         short_description: g.summary || 'No description available.',
         game_url: g.url || `https://www.igdb.com/games/${g.id}`,
-        genre: genresList.split(',')[0], // Primary genre
+        genre: genresList.split(',')[0] || 'Unknown', // Primary genre
         platform: platformsList,
         publisher: developerName, // Simplify for demo
         developer: developerName,

@@ -73,9 +73,9 @@ export default function GameCarousel({ games }: { games: Game[] }) {
                 onScroll={checkScroll}
                 className="flex overflow-x-auto gap-3 sm:gap-4 md:gap-5 pb-8 pt-4 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-4 md:px-0 scroll-smooth"
             >
-                {games.map((game, index) => (
+                {games.map((game) => (
                     <div key={game.id} className="snap-start shrink-0 w-[130px] sm:w-[150px] md:w-[180px] lg:w-[200px]">
-                        <GameCard game={game} index={index} />
+                        <GameCard game={game} />
                     </div>
                 ))}
             </div>

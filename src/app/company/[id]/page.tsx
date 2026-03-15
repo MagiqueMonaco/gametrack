@@ -121,8 +121,8 @@ async function CompanyDetails({ id }: { id: string }) {
 
                 {company.games.length > 0 ? (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4 sm:gap-6">
-                        {company.games.map((game, index) => (
-                            <GameCard key={game.id} game={game} index={index} />
+                        {company.games.map((game) => (
+                            <GameCard key={game.id} game={game} />
                         ))}
                     </div>
                 ) : (
@@ -146,10 +146,6 @@ export default async function CompanyPage(props: { params: Promise<{ id: string 
                     <CompanyDetails id={params.id} />
                 </Suspense>
             </main>
-
-            <footer className="bg-surface border-t border-border mt-auto py-8 text-center text-foreground/50 text-sm font-mono">
-                <p>GameTrack © {new Date().getFullYear()}. Using IGDB API.</p>
-            </footer>
         </>
     );
 }

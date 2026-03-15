@@ -9,6 +9,7 @@ export interface Game {
     id: number;
     title: string;
     thumbnail: string;
+    artwork?: string;
     short_description: string;
     game_url: string;
     genre: string;
@@ -24,10 +25,9 @@ export interface Game {
 
 interface GameCardProps {
     game: Game;
-    index: number;
 }
 
-export default function GameCard({ game, index }: GameCardProps) {
+export default function GameCard({ game }: GameCardProps) {
     const platformStrings = game.platform.split(',').map(p => p.trim());
     const uniqueGroups = getUniquePlatformGroups(platformStrings);
     const displayGroups = uniqueGroups.slice(0, 3);

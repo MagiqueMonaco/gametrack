@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { X, Copy, Check, AlertTriangle, User, KeyRound, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,6 +11,14 @@ interface Props {
 }
 
 export default function AuthModal({ isOpen, onClose }: Props) {
+  return (
+    <AnimatePresence>
+      {isOpen && <AuthModalBody onClose={onClose} />}
+    </AnimatePresence>
+  );
+}
+
+function AuthModalBody({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<'login' | 'register'>('login');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -22,20 +30,10 @@ export default function AuthModal({ isOpen, onClose }: Props) {
 
   const { register, login, error, clearError } = useAuthStore();
 
-  // Reset state when modal opens/closes
-  useEffect(() => {
-    if (isOpen) {
-      setTab('login');
-      setPassword('');
-      setConfirmPassword('');
-      setLoginUuid('');
-      setLoginPassword('');
-      setRegisteredUuid(null);
-      setCopied(false);
-      clearError();
-      setIsSubmitting(false);
-    }
-  }, [isOpen, clearError]);
+  const handleClose = () => {
+    clearError();
+    onClose();
+  };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +61,7 @@ export default function AuthModal({ isOpen, onClose }: Props) {
     setIsSubmitting(false);
 
     if (success) {
-      onClose();
+      handleClose();
     }
   };
 
@@ -76,19 +74,17 @@ export default function AuthModal({ isOpen, onClose }: Props) {
   };
 
   const handleDoneWithRegistration = () => {
-    onClose();
+    handleClose();
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-0">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-0">
           {/* Backdrop */}
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={handleClose}
             className="absolute inset-0 bg-background/80 backdrop-blur-md" 
           />
 
@@ -102,7 +98,7 @@ export default function AuthModal({ isOpen, onClose }: Props) {
           >
             {/* Close button */}
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="absolute top-4 right-4 p-2 text-foreground/40 hover:text-foreground hover:bg-surface-hover rounded-full transition-colors z-10"
             >
               <X className="w-5 h-5" />
@@ -346,7 +342,5 @@ export default function AuthModal({ isOpen, onClose }: Props) {
             </AnimatePresence>
           </motion.div>
         </div>
-      )}
-    </AnimatePresence>
   );
 }
