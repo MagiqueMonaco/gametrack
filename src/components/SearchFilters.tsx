@@ -6,6 +6,7 @@ import { LayoutGrid, Flame, Trophy, Gem, Crosshair, Map, Zap, Puzzle, Medal, Fla
 
 const CATEGORIES = [
     { id: 'all', label: 'All Games', icon: LayoutGrid },
+    { id: 'anticipated', label: 'Anticipated', icon: Flame },
     { id: 'trending', label: 'Trending', icon: Flame },
     { id: 'top', label: 'Top Rated', icon: Trophy },
     { id: 'action', label: 'Action', icon: Zap },

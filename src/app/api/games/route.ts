@@ -84,7 +84,14 @@ export async function GET(request: Request) {
         queryConditions = `where genres = (4); sort total_rating_count desc;`;
         break;
       case 'trending':
-        queryConditions = `sort popularity desc;`;
+        const trendingTimestamp = Math.floor(Date.now() / 1000) - (2 * 30 * 24 * 60 * 60); // Last 2 months
+        const now = Math.floor(Date.now() / 1000);
+        // Use 'hypes' to find genuinely anticipated/trending very recent games that are already out
+        queryConditions = `where first_release_date >= ${trendingTimestamp} & first_release_date <= ${now} & hypes > 0 & cover != null; sort hypes desc;`;
+        break;
+      case 'anticipated':
+        const upcomingTimestamp = Math.floor(Date.now() / 1000);
+        queryConditions = `where first_release_date > ${upcomingTimestamp} & hypes > 0 & cover != null; sort hypes desc;`;
         break;
       case 'top':
       default:
